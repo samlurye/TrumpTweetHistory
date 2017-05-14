@@ -1,0 +1,76 @@
+html(lang="en")
+
+    head
+
+        // get rid of favicon.ico 404 error
+        link(rel="shortcut icon" href="")
+
+        meta(charset="utf-8")
+        meta(http-equiv="X-UA-Compatible" content="IE=edge")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        meta(name="description" content="")
+        meta(name="author" content="")
+
+        title Trump Tweet History
+
+        // Bootstrap Core CSS
+        link(href="/css/bootstrap.min.css" rel="stylesheet")
+        link(href="/css/one-page-wonder.css" rel="stylesheet")
+
+        // my own CSS
+        link(href="/css/mystyles.css" rel="stylesheet")
+
+        // jQuery
+        script(src="/js/jquery.js")
+
+        // Bootstrap Core JavaScript
+        script(src="/js/bootstrap.min.js")
+
+        // include plotly, for graphing
+        script(src="https://cdn.plot.ly/plotly-latest.min.js")
+
+        script(src="/js/data.js")
+
+    body
+
+        // Navigation
+        nav(class="navbar navbar-inverse navbar-fixed-top" role="navigation")
+            div(class="container")
+                // Brand and toggle get grouped for better mobile display
+                div(class="navbar-header")
+                    button(type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1")
+                        span(class="sr-only") Toggle navigation
+                        span(class="icon-bar")
+                        span(class="icon-bar")
+                        span(class="icon-bar")
+                // Collect the nav links, forms, and other content for toggling 
+                div(class="collapse navbar-collapse" id="bs-example-navbar-collapse-1")
+
+        // Full Width Image Header
+        header(class="header-image")
+            div(class="headline")
+                div(class="container")
+                    h1 Trump Tweet History
+
+        // Page Content 
+        div(class="container")
+
+            hr(class="featurette-divider")
+
+            // First Featurette
+            div(class="featurette" id="plotDiv1")
+                
+                h2(id="header") Loading his many, many tweets....
+                img(src="/images/loading.gif" style="display: block; margin: 0 auto;" id="loading")
+                div(id="plot")  
+
+                div(id="monthsDiv1")
+
+            hr(class="featurette-divider")
+
+            // Footer 
+            footer
+                div(class="row")
+                    div(class="col-lg-12")
+                        p Sam Lurye 2017
+
