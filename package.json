@@ -1,0 +1,27 @@
+{
+  "name": "trump-tweet-history",
+  "description": "Trump Tweet History",
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "Sam Lurye",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samlurye/TrumpTweetHistory/tree/master"
+  },
+  "engines": {
+    "node": ">=4.3.2"
+  },
+  "scripts": {
+    "deploy": "gcloud app deploy",
+    "start": "node app.js",
+    "lint": "samples lint",
+    "pretest": "npm run lint",
+    "system-test": "samples test app",
+    "test": "npm run system-test",
+    "e2e-test": "samples test deploy"
+  },
+  "dependencies": {
+    "express": "4.15.2"
+  }
+}
