@@ -22,6 +22,8 @@
     "e2e-test": "samples test deploy"
   },
   "dependencies": {
-    "express": "4.15.2"
+    "express": "4.15.2",
+    "twitter-api-node-express": "0.1.0",
+    "twitter-node-client": "0.0.6"
   }
 }
