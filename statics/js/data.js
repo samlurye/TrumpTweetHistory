@@ -112,13 +112,16 @@ function sortTweets(tweets) {
 function plotAll(tweets) {
 	var x = [];
 	var likes = [];
+	var texts = [];
 	for (i = 0; i < tweets.length; i++) {
 		x[i] = parseDate(tweets[i].created_at).formatted;
 		likes[i] = tweets[i].favorite_count;
+		texts[i] = tweets[i].text;
 	}
 	var data = {
 		x : x,
 		y : likes,
+		hovertext : texts,
 		type : 'scatter'
 	};
 	makePlot(data, "Likes Over Time", "Likes");
@@ -128,20 +131,23 @@ function plotMonth(month, year) {
 	var tweetsOfMonth = sortedTweets[year][month];
 	var x = [];
 	var likes = [];
+	var texts = [];
 	var runningIndex = 0;
 	for (day = 0; day < tweetsOfMonth.length; day++) {
 		if (tweetsOfMonth[day]) {
 			for (i = 0; i < tweetsOfMonth[day].length; i++) {
 				x[runningIndex] = tweetsOfMonth[day][i].date.formatted;
 				likes[runningIndex] = tweetsOfMonth[day][i].likes;
+				texts[runningIndex] = tweetsOfMonth[day][i].text;
 				runningIndex++;
 			}
 		}
 	}
 	var data = {
-		x: x,
-		y: likes,
-		type: 'scatter'
+		x : x,
+		y : likes,
+		hovertext : texts,
+		type : 'scatter'
 	};
 	makePlot(data, "Likes Over Time: " + monthStuff[month].name + ' ' + year, "Likes");
 }
