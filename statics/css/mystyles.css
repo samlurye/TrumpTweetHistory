@@ -1,4 +1,48 @@
-.plot-button {
-	float: left;
-	margin: 10px;
+.graph-select:hover {
+	background-color: #dbdbdb;
+	cursor: pointer;	
 }
+
+.graph-select-bar {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding-left: 0px;
+	display: none;
+}
+
+.graph-select-bar-inner {
+	width: 800px;
+}
+
+.graph-select-bar-inner .graph-select {
+	float: left;
+	padding: 10px;
+	border: solid 1px #999999;
+	border-right-style: none;
+}
+
+.graph-select-bar-inner div:first-of-type {
+	border-bottom-left-radius: 6px;
+	border-top-left-radius: 6px;
+}
+
+.graph-select-bar-inner div:last-of-type {
+	border-bottom-right-radius: 6px;
+	border-top-right-radius: 6px;
+	border-right: solid 1px #999999;
+}
+
+#graphOptionsDiv hr:last-of-type {
+	display: none;
+}
+
+
+
+
+
+
+
+
+
+
+

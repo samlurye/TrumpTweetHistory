@@ -183,18 +183,22 @@ function addEventToYearButton(year) {
 function configureMonthButtons() {
 	for (var year in sortedTweets) {
 		if (year != 'all') {
-		    $('#monthsDiv1').prepend(
-		        '<button class="btn btn-default" id="' + year + '">' + year + '</button>' +
-		        '<div class="container" id="months' + year + '"></div>'
+		    $('#graphOptionsDiv').prepend(
+		        '<div class="container graph-select-bar">' +
+		        	'<div class="graph-select-bar-inner" id="' + year + 'Options">' +
+		        		'<div class="graph-select" id="' + year + '">' +
+		        			year +
+		        		'</div>' +
+		        	'</div>' +
+		        '</div>' +
+		        '<hr>'
 		    );
 		    addEventToYearButton(year);
 		    for (var month in sortedTweets[year]) {
 		    	if (month != 'all') {
-			        $('#months' + year).append(
-			            '<div class="plot-button">' +
-			                '<button class="btn btn-default" id=' + month + year + '>' +
-			                    month +
-			                '</button>' +
+			        $('#' + year + 'Options').append(
+			            '<div class="graph-select" id="' + month + year + '">' +
+			            	monthStuff[month].name +
 			            '</div>'
 			        );
 			        addEventToMonthButton(month + year);
@@ -202,24 +206,54 @@ function configureMonthButtons() {
 		    }
 		}
 	}
-	$('#monthsDiv1').prepend(
-		'<div class="container" style="margin-bottom:10px;padding:0px">' +
-			'<button class="btn btn-default" id="showAll">' +
-				'All Tweets' +
-			'</button>' +
-		'</div>'
+	$('#graphOptionsDiv').prepend(
+		'<div class="container graph-select-bar">' +
+        	'<div class="graph-select-bar-inner">' +
+        		'<div class="graph-select" id="showAll">' +
+        			'All Tweets' +
+        		'</div>' +
+        	'</div>' +
+        '</div>' +
+        '<hr>'	
 	);
 	$('#showAll').click(function() {
 		plotAllLikes();
 	});
 }
 
+function plotAverageLikes() {
+	var sum = 0;
+	var likes = sortedTweets.all.likes;
+	var likesAvg = [];
+	for (i = 0; i < sortedTweets.all.likes.length; i++) {
+		sum = sum + likes[i];
+		likesAvg[i] = sum / (i + 1);
+	}
+	var data = {
+		x: sortedTweets.all.datesFormatted,
+		y: likesAvg,
+		type: 'scatter'
+	}
+	makePlot(data, "Average Likes Per Tweet Over Time", "Date and Time of Tweet", "Average Likes");
+}
+
 $(document).ready(function() {
 	$.getJSON('/load', function(response) {
         console.log(response.tweets.length);
         sortTweets(response.tweets.reverse());
-        configureMonthButtons();
         plotAllLikes();
+        configureMonthButtons();
+        $('.graph-select-bar').each(function() {
+        	$(this).css({display: 'block'});
+        });
+        $('#overtime').click(function() {
+        	$('#graphOptionsDiv').css({display: 'block'});
+        	plotAllLikes();
+        });
+        $('#avg').click(function() {
+        	$('#graphOptionsDiv').css({display: 'none'});
+        	plotAverageLikes();
+        });
     });
 });
 

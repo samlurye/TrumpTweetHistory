@@ -55,22 +55,27 @@ html(lang="en")
         // Page Content 
         div(class="container")
 
-            hr(class="featurette-divider")
+            hr(class="featurette-divider" style="margin-bottom:40px;")
+
+            div(class="container graph-select-bar" id="graphBar")
+                div(class="graph-select-bar-inner")
+                    div(class="graph-select" id="overtime") Likes Over Time
+                    div(class="graph-select" id="avg") Average Likes
 
             // First Featurette
-            div(class="featurette" id="plotDiv1")
+            div(class="featurette" id="plotDiv")
                 
                 h2(id="header") Loading his many, many tweets....
                 img(src="/images/loading.gif" style="display: block; margin: 0 auto;" id="loading")
                 div(id="plot")  
 
-                div(id="monthsDiv1")
+                div(id="graphOptionsDiv")
 
-            hr(class="featurette-divider")
+                hr
 
-            // Footer 
-            footer
-                div(class="row")
-                    div(class="col-lg-12")
-                        p Sam Lurye 2017
+                // Footer 
+                footer
+                    div(class="row")
+                        div(class="col-lg-12")
+                            p Sam Lurye 2017
 
