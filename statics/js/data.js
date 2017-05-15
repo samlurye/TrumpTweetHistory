@@ -1,64 +1,74 @@
-const monthStuff = {
-	Jan : {
-		name : 'January',
-		num : '01'
+function tweetArrays() {
+	this.texts = [];
+	this.datesFormatted = [];
+	this.likes = [];
+}
+
+var sortedTweets = {
+	all: new tweetArrays()
+};
+
+var monthStuff = {
+	Jan: {
+		name: 'January',
+		num: '01'
 	},
-	Feb : {
-		name : 'February',
-		num : '02'
+	Feb: {
+		name: 'February',
+		num: '02'
 	},
-	Mar : {
-		name : 'March',
-		num : '03'
+	Mar: {
+		name: 'March',
+		num: '03'
 	},
-	Apr : {
-		name : 'April',
-		num : '04'
+	Apr: {
+		name: 'April',
+		num: '04'
 	},
-	May : {
-		name : 'May',
-		num : '05'
+	May: {
+		name: 'May',
+		num: '05'
 	},
-	Jun : {
-		name : 'June',
-		num : '06'
+	Jun: {
+		name: 'June',
+		num: '06'
 	},
-	Jul : {
-		name : 'July',
-		num : '07'
+	Jul: {
+		name: 'July',
+		num: '07'
 	},
-	Aug : { 
-		name : 'August',
-		num : '08'
+	Aug: { 
+		name: 'August',
+		num: '08'
 	},
-	Sep : {
-		name : 'September',
-		num : '09'
+	Sep: {
+		name: 'September',
+		num: '09'
 	},
-	Oct : {
-		name : 'October',
-		num : '10'
+	Oct: {
+		name: 'October',
+		num: '10'
 	},
-	Nov : {
-		name : 'November',
-		num : '11'
+	Nov: {
+		name: 'November',
+		num: '11'
 	},
-	Dec : {
-		name : 'December',
-		num : '12'
+	Dec: {
+		name: 'December',
+		num: '12'
 	}
 };
 
-function makePlot(data, name, yaxis) {
+function makePlot(data, name, xaxis, yaxis) {
 	$('#header').html(name);
 	$('#loading').remove();
 	var layout = {
-		xaxis : {
-			title : "Date and Time of Tweet"
+		xaxis: {
+			title: xaxis
 		},
-		yaxis : {
-			title : yaxis,
-			rangemode : 'tozero'
+		yaxis: {
+			title: yaxis,
+			rangemode: 'tozero'
 		}
 	}
 	Plotly.newPlot('plot', [data], layout);
@@ -86,122 +96,130 @@ function parseDate(date) {
 	}
 }
 
-var sortedTweets = {};
-
 function sortTweets(tweets) {
 	for (i = 0; i < tweets.length; i++) {
+
 		var dateInfo = parseDate(tweets[i].created_at);
+
 		if (!sortedTweets[dateInfo.year]) {
-			sortedTweets[dateInfo.year] = {};
+			sortedTweets[dateInfo.year] = {all: new tweetArrays()}
 		}
 		if (!sortedTweets[dateInfo.year][dateInfo.month]) {
-			sortedTweets[dateInfo.year][dateInfo.month] = [];
+			sortedTweets[dateInfo.year][dateInfo.month] = {
+				all: new tweetArrays(),
+				days: []
+			};
+		} 
+		if (!sortedTweets[dateInfo.year][dateInfo.month].days[dateInfo.day]) {
+			sortedTweets[dateInfo.year][dateInfo.month].days[dateInfo.day] = new tweetArrays();	
 		}
-		if (!sortedTweets[dateInfo.year][dateInfo.month][dateInfo.day]) {
-			sortedTweets[dateInfo.year][dateInfo.month][dateInfo.day] = [];
-		}
-		sortedTweets[dateInfo.year][dateInfo.month][dateInfo.day].push({
-			text : tweets[i].text,
-			date : dateInfo,
-			likes : tweets[i].favorite_count
-		});
+
+		sortedTweets.all.texts.push(tweets[i].text);
+		sortedTweets.all.datesFormatted.push(dateInfo.formatted);
+		sortedTweets.all.likes.push(tweets[i].favorite_count);
+
+		sortedTweets[dateInfo.year].all.texts.push(tweets[i].text);
+		sortedTweets[dateInfo.year].all.datesFormatted.push(dateInfo.formatted);
+		sortedTweets[dateInfo.year].all.likes.push(tweets[i].favorite_count);
+
+		sortedTweets[dateInfo.year][dateInfo.month].all.texts.push(tweets[i].text);
+		sortedTweets[dateInfo.year][dateInfo.month].all.datesFormatted.push(dateInfo.formatted);
+		sortedTweets[dateInfo.year][dateInfo.month].all.likes.push(tweets[i].favorite_count);
+
+		sortedTweets[dateInfo.year][dateInfo.month].days[dateInfo.day].texts.push(tweets[i].text);
+		sortedTweets[dateInfo.year][dateInfo.month].days[dateInfo.day].datesFormatted.push(dateInfo.formatted);
+		sortedTweets[dateInfo.year][dateInfo.month].days[dateInfo.day].likes.push(tweets[i].favorite_count);
 	}
 	console.log(sortedTweets);
 }
 
-function plotAll(tweets) {
-	var x = [];
-	var likes = [];
-	var texts = [];
-	for (i = 0; i < tweets.length; i++) {
-		x[i] = parseDate(tweets[i].created_at).formatted;
-		likes[i] = tweets[i].favorite_count;
-		texts[i] = tweets[i].text;
-	}
+function plotAllLikes() {
 	var data = {
-		x : x,
-		y : likes,
-		hovertext : texts,
-		type : 'scatter'
+		x: sortedTweets.all.datesFormatted,
+		y: sortedTweets.all.likes,
+		hovertext: sortedTweets.all.texts,
+		mode: 'markers',
+		type: 'scatter'
 	};
-	makePlot(data, "Likes Over Time", "Likes");
+	makePlot(data, "Likes Over Time: 2016 and 2017", "Date and Time of Tweet", "Likes");
 }
 
-function plotMonth(month, year) {
-	var tweetsOfMonth = sortedTweets[year][month];
-	var x = [];
-	var likes = [];
-	var texts = [];
-	var runningIndex = 0;
-	for (day = 0; day < tweetsOfMonth.length; day++) {
-		if (tweetsOfMonth[day]) {
-			for (i = 0; i < tweetsOfMonth[day].length; i++) {
-				x[runningIndex] = tweetsOfMonth[day][i].date.formatted;
-				likes[runningIndex] = tweetsOfMonth[day][i].likes;
-				texts[runningIndex] = tweetsOfMonth[day][i].text;
-				runningIndex++;
-			}
-		}
-	}
+function plotLikesByYear(year) {
 	var data = {
-		x : x,
-		y : likes,
-		hovertext : texts,
-		type : 'scatter'
+		x: sortedTweets[year].all.datesFormatted,
+		y: sortedTweets[year].all.likes,
+		hovertext: sortedTweets[year].all.texts,
+		mode: 'markers',
+		type: 'scatter'
 	};
-	makePlot(data, "Likes Over Time: " + monthStuff[month].name + ' ' + year, "Likes");
+	makePlot(data, "Likes Over Time: " + year, "Date and Time of Tweet", "Likes");
 }
 
-function displayMonthButtons() {
-	var monthIDs = [];
-	for (var year in sortedTweets) {
-	    $('#monthsDiv1').prepend(
-	        '<h3 id=' + year + '>' + year + '</h1>' +
-	        '<div class="container" id="months' + year + '"></div>'
-	    );
-	    for (var month in sortedTweets[year]) {
-	        $('#months' + year).append(
-	            '<div class="month-button">' +
-	                '<button class="btn btn-default" id=' + month + year + '>' +
-	                    month +
-	                '</button>' +
-	            '</div>'
-	        );
-	        monthIDs.push(month + year);
-	        console.log(monthIDs);
-	    }
+function plotLikesByMonth(month, year) {
+	var data = {
+		x: sortedTweets[year][month].all.datesFormatted,
+		y: sortedTweets[year][month].all.likes,
+		hovertext: sortedTweets[year][month].all.texts,
+		mode: 'markers',
+		type: 'scatter'
 	}
-	$('#monthsDiv1').prepend(
-		'<div class="container">' +
-			'<div class="month-button">' +
-				'<button class="btn btn-default" id="showAll">' +
-					'All Tweets' +
-				'</button>' +
-			'</div>' +
-		'</div>'
-	);
-	return monthIDs;
+	makePlot(data, "Likes Over Time: " + month + " " + year, "Date and Time of Tweet", "Likes");
 }
 
 function addEventToMonthButton(monthID) {
 	$('#' + monthID).click(function() {
-		plotMonth(monthID.substring(0, 3), monthID.substring(3, 7));
+		var month = monthID.substring(0, 3);
+		var year = monthID.substring(3, 7);
+		plotLikesByMonth(month, year);
+	});
+}
+
+function addEventToYearButton(year) {
+	$('#' + year).click(function() {
+		plotLikesByYear(year);
+	});
+}
+
+function configureMonthButtons() {
+	for (var year in sortedTweets) {
+		if (year != 'all') {
+		    $('#monthsDiv1').prepend(
+		        '<button class="btn btn-default" id="' + year + '">' + year + '</button>' +
+		        '<div class="container" id="months' + year + '"></div>'
+		    );
+		    addEventToYearButton(year);
+		    for (var month in sortedTweets[year]) {
+		    	if (month != 'all') {
+			        $('#months' + year).append(
+			            '<div class="plot-button">' +
+			                '<button class="btn btn-default" id=' + month + year + '>' +
+			                    month +
+			                '</button>' +
+			            '</div>'
+			        );
+			        addEventToMonthButton(month + year);
+			    }
+		    }
+		}
+	}
+	$('#monthsDiv1').prepend(
+		'<div class="container" style="margin-bottom:10px;padding:0px">' +
+			'<button class="btn btn-default" id="showAll">' +
+				'All Tweets' +
+			'</button>' +
+		'</div>'
+	);
+	$('#showAll').click(function() {
+		plotAllLikes();
 	});
 }
 
 $(document).ready(function() {
 	$.getJSON('/load', function(response) {
         console.log(response.tweets.length);
-        const tweets = response.tweets.reverse();
-        sortTweets(response.tweets);
-        plotAll(tweets);
-        var monthIDs = displayMonthButtons();
-        $('#showAll').click(function() {
-        	plotAll(tweets);
-        });
-        for (i = 0; i < monthIDs.length; i++) {
-        	addEventToMonthButton(monthIDs[i]);
-        }
+        sortTweets(response.tweets.reverse());
+        configureMonthButtons();
+        plotAllLikes();
     });
 });
 
