@@ -161,7 +161,7 @@ var commonWords = ['','the','of','to','and','a','in','is','it','you',
 					'range','steam','motion','path','liquid','log','meant','quotient','teeth','shell',
 					'neck', '-', '&amp;'];
 
-function makePlot(data, name, xaxis, yaxis) {
+function makePlot(data, name, xaxis, yaxis, rangeManual) {
 	$('#header').html(name);
 	$('#loading').remove();
 	var layout = {
@@ -173,7 +173,10 @@ function makePlot(data, name, xaxis, yaxis) {
 			rangemode: 'tozero'
 		}
 	}
-	Plotly.newPlot('plot', [data], layout);
+	if (rangeManual) {
+		layout.yaxis['range'] = rangeManual.yrange; 
+	}
+	Plotly.newPlot('plot', data, layout);
 }
 
 function parseDate(date) {
@@ -236,35 +239,35 @@ function sortTweets(tweets) {
 }
 
 function plotAllLikes() {
-	var data = {
+	var data = [{
 		x: sortedTweets.all.datesFormatted,
 		y: sortedTweets.all.likes,
 		hovertext: sortedTweets.all.texts,
 		mode: 'markers',
 		type: 'scatter'
-	};
+	}];
 	makePlot(data, "Likes Per Tweet Over Time: 2016 and 2017", "Date and Time of Tweet", "Likes");
 }
 
 function plotLikesByYear(year) {
-	var data = {
+	var data = [{
 		x: sortedTweets[year].all.datesFormatted,
 		y: sortedTweets[year].all.likes,
 		hovertext: sortedTweets[year].all.texts,
 		mode: 'markers',
 		type: 'scatter'
-	};
+	}];
 	makePlot(data, "Likes Per Tweet Over Time: " + year, "Date and Time of Tweet", "Likes");
 }
 
 function plotLikesByMonth(month, year) {
-	var data = {
+	var data = [{
 		x: sortedTweets[year][month].all.datesFormatted,
 		y: sortedTweets[year][month].all.likes,
 		hovertext: sortedTweets[year][month].all.texts,
 		mode: 'markers',
 		type: 'scatter'
-	}
+	}];
 	makePlot(data, "Likes Per Tweet Over Time: " + month + " " + year, "Date and Time of Tweet", "Likes");
 }
 
@@ -323,20 +326,36 @@ function configureOptionsForOverTime() {
 	});
 }
 
-function plotAverageLikes() {
+function plotAverageLikes(plotChange) {
 	var sum = 0;
 	var likes = sortedTweets.all.likes;
 	var likesAvg = [];
+	var delta = [0];
 	for (i = 0; i < sortedTweets.all.likes.length; i++) {
 		sum = sum + likes[i];
 		likesAvg[i] = sum / (i + 1);
+		if (i >= 1) {
+			delta.push(likesAvg[i] - likesAvg[i - 1]);
+		}
 	}
-	var data = {
+	var AverageLikes = [{
 		x: sortedTweets.all.datesFormatted,
 		y: likesAvg,
 		type: 'scatter'
+	}];
+	var Delta = [{
+		x: sortedTweets.all.datesFormatted,
+		y: delta,
+		type: 'scatter'
+	}];
+	var deltaRange = {
+		yrange: [-300, 300]
 	};
-	makePlot(data, "Average Likes Per Tweet Over Time", "Date and Time of Tweet", "Average Likes");
+	if (plotChange) {
+		makePlot(Delta, "Change: Average Likes Per Tweet Over Time", "Date and Time of Tweet", "Change in Average Likes", deltaRange);
+	} else {
+		makePlot(AverageLikes, "Average Likes Per Tweet Over Time", "Date and Time of Tweet", "Average Likes");
+	}
 }
 
 function plotTweetsPerDay() {
@@ -356,12 +375,12 @@ function plotTweetsPerDay() {
 			}
 		}
 	}
-	var data = {
+	var data = [{
 		x: days,
 		y: tweetsPerDay,
 		mode: 'markers',
 		type: 'scatter'
-	};
+	}];
 	makePlot(data, "Tweets Per Day", "Days", "Number of Tweets");
 }
 
@@ -396,12 +415,12 @@ function plotCommonWords() {
 			}
 		}
 	}
-	var data = {
+	var data = [{
 		x: x,
 		y: y,
 		type: 'bar'
-	};
-	makePlot(data, "(Non-Common) Words Used At Least 50 Times", "Word", "Number of Uses");
+	}];
+	makePlot(data, "(Non-Common) Words Used At Least 50 Times", undefined, "Number of Uses");
 };
 
 $(document).ready(function() {
@@ -419,8 +438,12 @@ $(document).ready(function() {
         });
         $('#avg').click(function() {
         	$('#graphOptionsDiv').css({display: 'none'});
-        	plotAverageLikes();
+        	plotAverageLikes(false);
         });
+        $('#avgDelta').click(function() {
+        	$('#graphOptionsDiv').css({display: 'none'});
+        	plotAverageLikes(true);	
+        })
         $('#perDay').click(function() {
         	$('#graphOptionsDiv').css({display: 'none'});
         	plotTweetsPerDay();
