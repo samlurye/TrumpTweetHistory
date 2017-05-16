@@ -8,6 +8,7 @@
 	margin-bottom: 10px;
 	padding-left: 0px;
 	display: none;
+	overflow: scroll;
 }
 
 .graph-select-bar-inner {
@@ -30,6 +31,10 @@
 	border-bottom-right-radius: 6px;
 	border-top-right-radius: 6px;
 	border-right: solid 1px #999999;
+}
+
+#graphOptionsDiv {
+	overflow: scroll;
 }
 
 #graphOptionsDiv hr:last-of-type {
