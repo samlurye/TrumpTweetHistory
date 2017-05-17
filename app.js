@@ -107,15 +107,14 @@ app.get('/', function(req, res) {
 app.get('/load', function(req, res) {
 	// if there are tweets in the cache, send them to the client
 	// if not, try again in 100 ms
-	/*function loadTweets() {
+	function loadTweets() {
 		if (tweetsCached) {
 			res.json({tweets: tweets});
 		} else {
 			setTimeout(loadTweets, 100);
 		}
 	}
-	loadTweets();*/
-	res.json({tweets: tweets});
+	loadTweets();
 });
 
 // set up server to listen to specified port
