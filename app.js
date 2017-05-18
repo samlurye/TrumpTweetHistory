@@ -83,6 +83,7 @@ function cacheTweets() {
 			newTweets = newTweets.concat(JSON.parse(data));
 			// keep getting tweets until there are at least 3000
 			if (newTweets.length < 3000) {
+				apiCalls++;
 				getTweets(newTweets[newTweets.length - 1].id, false);
 			} else {
 				// put the tweets in the 'cache'
@@ -90,7 +91,6 @@ function cacheTweets() {
 				tweets = newTweets;
 				console.log("done");
 			}
-			apiCalls++;
 		});
 	}
 	getTweets(0, true);
