@@ -47,14 +47,14 @@ app.set('view engine', 'pug');
 var tweets = []
 // whether or not there are tweets in the cache
 var tweetsCached = false;
+// temporary storage for new tweets, so the old ones can still be accessed while being updated
+var newTweets = [];
 
 // for testing
 var apiCalls = 1;
 
 // put tweets into the cache 
 function cacheTweets() {
-	// temporary storage for new tweets, so the old ones can still be accessed while being updated
-	var newTweets = [];
 	/* 
 		Recursively request 200 tweets at a time from the Twitter API
 		The max_id parameter allows you to set the most recent tweet you get,
@@ -91,6 +91,7 @@ function cacheTweets() {
 				// put the tweets in the 'cache'
 				tweetsCached = true;
 				tweets = newTweets;
+				newTweets = [];
 				apiCalls = 1;
 				console.log("done");
 			}
