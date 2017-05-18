@@ -48,6 +48,9 @@ var tweets = []
 // whether or not there are tweets in the cache
 var tweetsCached = false;
 
+// for testing
+var apiCalls = 1;
+
 // put tweets into the cache 
 function cacheTweets() {
 	// temporary storage for new tweets, so the old ones can still be accessed while being updated
@@ -61,7 +64,6 @@ function cacheTweets() {
 	*/
 	function getTweets(max_id, isFirstCall) {
 		var params;
-		var apiCalls = 1;
 		if (isFirstCall) {
 			params = {
 				screen_name : 'realDonaldTrump',
@@ -89,6 +91,7 @@ function cacheTweets() {
 				// put the tweets in the 'cache'
 				tweetsCached = true;
 				tweets = newTweets;
+				apiCalls = 1;
 				console.log("done");
 			}
 		});
