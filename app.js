@@ -61,7 +61,7 @@ function cacheTweets() {
 	*/
 	function getTweets(max_id, isFirstCall) {
 		var params;
-		var apiCalls = 0;
+		var apiCalls = 1;
 		if (isFirstCall) {
 			params = {
 				screen_name : 'realDonaldTrump',
@@ -79,6 +79,7 @@ function cacheTweets() {
 		}
 		// query the Twitter API
 		twitter.getUserTimeline(params, error, function(data) {
+			console.log(apiCalls);
 			newTweets = newTweets.concat(JSON.parse(data));
 			// keep getting tweets until there are at least 3000
 			if (newTweets.length < 3000) {
