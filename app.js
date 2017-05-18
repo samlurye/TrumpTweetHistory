@@ -51,7 +51,7 @@ var tweetsCached = false;
 // put tweets into the cache 
 function cacheTweets() {
 	// temporary storage for new tweets, so the old ones can still be accessed while being updated
-	newTweets = [];
+	var newTweets = [];
 	/* 
 		Recursively request 200 tweets at a time from the Twitter API
 		The max_id parameter allows you to set the most recent tweet you get,
@@ -61,6 +61,7 @@ function cacheTweets() {
 	*/
 	function getTweets(max_id, isFirstCall) {
 		var params;
+		var apiCalls = 0;
 		if (isFirstCall) {
 			params = {
 				screen_name : 'realDonaldTrump',
@@ -88,6 +89,7 @@ function cacheTweets() {
 				tweets = newTweets;
 				console.log("done");
 			}
+			apiCalls++;
 		});
 	}
 	getTweets(0, true);
