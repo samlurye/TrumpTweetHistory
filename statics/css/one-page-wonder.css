@@ -12,7 +12,7 @@ body {
     display: block;
     width: 100%;
     text-align: center;
-    background: #e0ecff no-repeat center center scroll;*/
+    background: #e0ecff no-repeat center center scroll;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
@@ -25,7 +25,6 @@ body {
 
 .headline h1 {
     font-size: 130px;
-    background: #e0ecff;
 }
 
 .headline h2 {

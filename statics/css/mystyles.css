@@ -41,6 +41,92 @@
 	display: none;
 }
 
+.header-image {
+	background-image: url('/images/TrumpCoverPhoto.png');
+	position: relative;
+}
+
+.headline h1 {
+	width: 75%;
+	padding-bottom: 30px;
+	padding-top: 30px;
+	margin: auto;
+}
+
+.headline .container {
+	width: 100%;
+	background-color: rgba(203, 217, 239, 0.3);
+	margin: auto;
+}
+
+#source-text {
+	position: absolute;
+	bottom: 5px;
+	left: 10px;
+	font-size: 11px;
+}
+
+.search-bar {
+	width: 300px;
+	margin: auto;
+}
+
+.search-bar input {
+	border: 1px solid #999999;
+	width: inherit;
+	height: 30px;
+	padding-left: 5px;
+	margin-top: 20px;
+}
+
+.search-bar input:focus {
+	outline: none;
+}
+
+.unclicked {
+	border-radius: 6px;
+}
+
+.clicked {
+	border-radius: 6px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+
+.search-bar ul {
+	position: absolute;
+	width: inherit;
+	height: 150px;
+	border: 1px solid #999999;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+	border-top-style: none;
+	overflow-y: scroll;
+	list-style-type: none;
+	background-color: #ffffff;
+	padding: 0px;
+	display: none;
+}
+
+.search-bar li {
+	width: inherit;
+	margin: none;
+	padding: 5px;
+	padding-left: 10px;
+	font-size: 15px;
+
+}
+
+.search-bar li:hover {
+	background-color: #dbdbdb;
+	cursor: pointer;
+}
+
+#no-results:hover {
+	background-color: #ffffff;
+	cursor: auto;
+}
+
 
 
 

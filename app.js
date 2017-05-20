@@ -1,29 +1,20 @@
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 8080;
+console.log(process.env.HELLO);
 
 /************************* 
 Configure the twitter API
 *************************/
 
-module.exports = require('twitter-js-client/lib/Twitter');
+var Twitter = require('twitter');
 
-//Callback functions
-var error = function(err, response, body) {
-	console.log('ERROR [%s]', body);
-};
-
-var Twitter = require('twitter-node-client').Twitter;
-
-var config = {
-	"consumerKey": "JKB5XexbOEucGAM1DqfbNaCz1",
-	"consumerSecret": "OH3oLQwG5C9usgxKZig2uftr2pi2loQozOgoSIDSJB4bMPCzFr",
-	"accessToken": "791320431307452416-2asevnJNILCF3Xwb0oTSEPLyv6AaRom",
-	"accessTokenSecret": "IeRdnqX4jdScWK9Fyj8brvMaGDNJCoDrvPb4Wo55X44pU",
-	"callBackUrl": "None"
-};
-
-var twitter = new module.exports.Twitter(config);
+var client = new Twitter({
+	consumer_key: 'JKB5XexbOEucGAM1DqfbNaCz1',
+  	consumer_secret: 'OH3oLQwG5C9usgxKZig2uftr2pi2loQozOgoSIDSJB4bMPCzFr',
+  	access_token_key: '791320431307452416-2asevnJNILCF3Xwb0oTSEPLyv6AaRom',
+  	access_token_secret: 'IeRdnqX4jdScWK9Fyj8brvMaGDNJCoDrvPb4Wo55X44pU'
+});
 
 //************************
 
@@ -32,99 +23,114 @@ app.use(express.static('statics'));
 // set templating engine to pug
 app.set('view engine', 'pug');
 
-
-/*
-	The Twitter API limits you to 900 requests/15 minutes, to the last 3200 tweets/user,
-	and to 200 tweets/request. Getting 3000 tweets, then, requires 15 separate requests
-	to Twitter's servers, and therefore takes a substantial amount of time. My solution
-	is to 'cache' the most recent 3000 tweets every 15 minutes. This dramatically improves
-	client-side loading times and ensures that the site never exceeds the 900 request limit.
-
-	Note: I tried using a dedicated NodeJS caching module, but it was still really slow.
-*/
-
-// the 'cache'
-var tweets = []
-// whether or not there are tweets in the cache
-var tweetsCached = false;
-// temporary storage for new tweets, so the old ones can still be accessed while being updated
-var newTweets = [];
-
-// for testing
-var apiCalls = 1;
-
-// put tweets into the cache 
-function cacheTweets() {
-	/* 
-		Recursively request 200 tweets at a time from the Twitter API
-		The max_id parameter allows you to set the most recent tweet you get,
-		so after the first call (which returns the most recent 200 tweets),
-		set the max_id to the earliest tweet of the last 200 returned. This allows
-		the application to go further and further back in time.
-	*/
-	function getTweets(max_id, isFirstCall) {
-		var params;
-		if (isFirstCall) {
-			params = {
-				screen_name : 'realDonaldTrump',
-				count : 200,
-				// don't include retweets
-				include_rts : false
-			};
-		} else {
-			params = {
-				screen_name : 'realDonaldTrump',
-				count : 200,
-				max_id : max_id,
-				include_rts : false
-			};
-		}
-		// query the Twitter API
-		twitter.getUserTimeline(params, error, function(data) {
-			console.log(apiCalls);
-			newTweets = newTweets.concat(JSON.parse(data));
-			// keep getting tweets until there are at least 3000
-			if (newTweets.length < 3000) {
-				apiCalls++;
-				getTweets(newTweets[newTweets.length - 1].id, false);
-			} else {
-				// put the tweets in the 'cache'
-				tweetsCached = true;
-				tweets = newTweets;
-				newTweets = [];
-				apiCalls = 1;
-				console.log("done");
-			}
-		});
-	}
-	getTweets(0, true);
-}
-
-// cache tweets immediately once the server starts up
-cacheTweets();
-// update tweets every 15 minutes (900000 ms)
-setInterval(cacheTweets, 900000);
+var searchRateLimitExceeded = false;
 
 // load the homepage
 app.get('/', function(req, res) {
  	res.render('index');
 });
 
-// this route is called once the page is loaded, and returns the tweets in the cache
-app.get('/load', function(req, res) {
-	// if there are tweets in the cache, send them to the client
-	// if not, try again in 100 ms
-	function loadTweets() {
-		if (tweetsCached) {
-			res.json({tweets: tweets});
+// check to see if the program has exceeded the allotted number of requests to the API
+function checkRateLimit() {
+	client.get('application/rate_limit_status', function(error, data, misc) {
+		var usersExceeded = (data.resources.users['/users/search'].remaining > 0);
+		var timelineExceeded = (data.resources.statuses['/statuses/user_timeline'].remaining > 0);
+		if (usersExceeded && timelineExceeded) {
+			console.log('Search Enabled');
+			searchRateLimitExceeded = false;
 		} else {
-			setTimeout(loadTweets, 100);
+			console.log('Search Disabled');
+		}
+	});
+}
+
+// check every minute
+setInterval(checkRateLimit, 60000);
+
+app.get('/load', function(req, res) {
+	var tweets = [];
+	var apiCalls = 0;
+	function getTweets(max_id, isFirstCall) {
+		var params;
+		if (isFirstCall) {
+			params = {
+				screen_name : req.query.q,
+				count : 200,
+				// don't include retweets
+				include_rts : false
+			};
+		} else {
+			params = {
+				screen_name : req.query.q,
+				count : 200,
+				max_id : max_id,
+				include_rts : false
+			};
+		}
+		if (searchRateLimitExceeded) {
+			return res.json({tweets: [], disableSearch: true});
+		} else {
+			// query the Twitter API
+			client.get('statuses/user_timeline', params, function(error, data, misc) {
+				// error: rate limit exceeded, disable search
+				if (data.errors) {
+					searchRateLimitExceeded = true;
+					return res.json({tweets: [], disableSearch: true});
+				// otherwise keep going
+				} else {
+					tweets = tweets.concat(data);
+					// keep getting tweets until there are at least 3000 or until 15 calls have been made
+					console.log(req.query.q + ' ' + tweets.length);
+					if (tweets.length < 3000 && apiCalls < 15) {
+						apiCalls++;
+						getTweets(tweets[tweets.length - 1].id, searchRateLimitExceeded);
+					} else {
+						console.log("done");
+						res.json({tweets: tweets, disableSearch: searchRateLimitExceeded});
+					}
+				}
+			});
+		}
+	}	
+	getTweets(0, true);
+});
+
+app.get('/search', function(req, res) {
+	if (searchRateLimitExceeded) {
+		return res.json({accounts: [], disableSearch: true});
+	} else {
+		// if no query was entered, display 'No Results', don't bother searching the API
+		if (!req.query.search) {
+			res.json({accounts: ['No Results']});
+		} else {
+			// search the API
+			client.get('users/search', {'q': req.query.search,'count': 20}, function(error, data, misc) {
+				// error: rate limit exceeded, disable search
+				if (data.errors) {
+					console.log("Rate Limit Exceeded");
+					searchRateLimitExceeded = true;
+					return res.json({accounts: [], disableSearch: searchRateLimitExceeded});
+				// otherwise send results to page
+				} else {
+					if (data.length == 0) {
+						res.json({accounts: ['No Results'], disableSearch: searchRateLimitExceeded});
+					} else {
+						var accounts = [];
+						for (i = 0; i < Math.min(data.length, 10); i++) {
+							accounts[i] = data[i].screen_name;
+						}
+						res.json({accounts: accounts, disableSearch: searchRateLimitExceeded});
+					}
+				}
+			});
 		}
 	}
-	loadTweets();
 });
 
 // set up server to listen to specified port
 app.listen(port, function() {
   console.log(`listening on port ${ port }`);
 });
+
+
+
